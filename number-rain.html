@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Number Rain</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Space+Grotesk:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "Space Grotesk", sans-serif;
+        background:
+          radial-gradient(circle at top, rgba(255,255,255,0.6), transparent 28%),
+          linear-gradient(180deg, #fff1f4, #ffd9e2);
+        color: #241018;
+      }
+      .page {
+        width: min(960px, calc(100% - 24px));
+        margin: 0 auto;
+        padding: 24px 0 40px;
+      }
+      .back {
+        display: inline-block;
+        margin-bottom: 18px;
+        color: #6b1c33;
+        text-decoration: none;
+        font-weight: 700;
+      }
+      .hero {
+        text-align: center;
+        margin-bottom: 18px;
+      }
+      .hero h1 {
+        margin: 0 0 8px;
+        font-family: "Gaegu", cursive;
+        font-size: clamp(3rem, 8vw, 5rem);
+      }
+      .hero p {
+        margin: 0;
+        color: #8b4860;
+      }
+      .panel {
+        background: white;
+        border: 2px solid #f2b4c4;
+        border-radius: 22px;
+        padding: 22px;
+        box-shadow: 0 18px 40px rgba(104, 31, 57, 0.08);
+        position: relative;
+        overflow: hidden;
+      }
+      .panel::before {
+        content: "";
+        position: absolute;
+        inset: -20px auto auto -20px;
+        width: 180px;
+        height: 180px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(255,35,86,0.12), transparent 65%);
+      }
+      .stats {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 16px;
+        position: relative;
+        z-index: 1;
+      }
+      .arena {
+        position: relative;
+        min-height: 430px;
+        border-radius: 18px;
+        overflow: hidden;
+        background:
+          repeating-linear-gradient(90deg, rgba(255,255,255,0.06) 0 14px, transparent 14px 30px),
+          linear-gradient(180deg, #ff245a, #cf123f);
+        box-shadow: inset 0 -40px 80px rgba(0,0,0,0.12);
+        z-index: 1;
+      }
+      .target-bar {
+        position: absolute;
+        inset: 14px 14px auto 14px;
+        z-index: 2;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 14px;
+        border-radius: 14px;
+        background: rgba(255,255,255,0.14);
+        color: white;
+      }
+      .drop {
+        position: absolute;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        border: 0;
+        background: linear-gradient(180deg, #ffffff, #ffe8ee);
+        color: #cf123f;
+        font-size: 1.3rem;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.16);
+      }
+      .controls {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: center;
+        margin-top: 18px;
+        position: relative;
+        z-index: 1;
+      }
+      .status {
+        min-height: 1.6em;
+        color: #8b4860;
+      }
+      .button {
+        padding: 11px 16px;
+        border: 0;
+        border-radius: 12px;
+        background: linear-gradient(180deg, #241018, #4a1830);
+        color: white;
+        cursor: pointer;
+        font-weight: 700;
+      }
+      @media (max-width: 640px) {
+        .stats, .controls { flex-direction: column; align-items: stretch; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <a class="back" href="index.html">&larr; Back to home</a>
+      <header class="hero">
+        <h1>Number Rain</h1>
+        <p>Click only the target number before the wrong ones flood the screen.</p>
+      </header>
+
+      <section class="panel">
+        <div class="stats">
+          <p>Score: <strong id="score">0</strong></p>
+          <p>Best: <strong id="best">0</strong></p>
+          <p>Lives: <strong id="lives">3</strong></p>
+        </div>
+
+        <div class="arena" id="arena">
+          <div class="target-bar">
+            <span>Target number</span>
+            <strong id="target">7</strong>
+          </div>
+        </div>
+
+        <div class="controls">
+          <p class="status" id="status">Press start, then click only the matching number.</p>
+          <button class="button" id="start" type="button">Start rain</button>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const arena = document.getElementById("arena");
+      const targetEl = document.getElementById("target");
+      const scoreEl = document.getElementById("score");
+      const bestEl = document.getElementById("best");
+      const livesEl = document.getElementById("lives");
+      const statusEl = document.getElementById("status");
+      const startButton = document.getElementById("start");
+
+      let score = 0;
+      let best = 0;
+      let lives = 3;
+      let target = 7;
+      let playing = false;
+      let spawnTimer = null;
+
+      function newTarget() {
+        target = Math.floor(Math.random() * 9) + 1;
+        targetEl.textContent = String(target);
+      }
+
+      function clearDrops() {
+        arena.querySelectorAll(".drop").forEach((drop) => drop.remove());
+      }
+
+      function loseLife() {
+        lives -= 1;
+        livesEl.textContent = String(lives);
+        if (lives <= 0) {
+          playing = false;
+          clearInterval(spawnTimer);
+          statusEl.textContent = "The storm won. Start again.";
+          best = Math.max(best, score);
+          bestEl.textContent = String(best);
+        }
+      }
+
+      function spawnDrop() {
+        if (!playing) return;
+
+        const value = Math.floor(Math.random() * 9) + 1;
+        const drop = document.createElement("button");
+        drop.type = "button";
+        drop.className = "drop";
+        drop.textContent = String(value);
+        drop.style.left = `${Math.random() * (arena.clientWidth - 70)}px`;
+        drop.style.top = "60px";
+
+        let y = 60;
+        const speed = 1.8 + Math.random() * 2.2;
+
+        drop.addEventListener("click", () => {
+          if (!playing) return;
+          if (value === target) {
+            score += 1;
+            scoreEl.textContent = String(score);
+            statusEl.textContent = "Correct. New target coming down.";
+            newTarget();
+          } else {
+            statusEl.textContent = "Wrong number. You lost a life.";
+            loseLife();
+          }
+          drop.remove();
+        });
+
+        arena.appendChild(drop);
+
+        function fall() {
+          if (!playing || !drop.isConnected) return;
+          y += speed;
+          drop.style.top = `${y}px`;
+          if (y > arena.clientHeight - 60) {
+            if (value === target) {
+              statusEl.textContent = "You missed the target number.";
+              loseLife();
+            }
+            drop.remove();
+            return;
+          }
+          requestAnimationFrame(fall);
+        }
+
+        requestAnimationFrame(fall);
+      }
+
+      startButton.addEventListener("click", () => {
+        clearDrops();
+        score = 0;
+        lives = 3;
+        playing = true;
+        scoreEl.textContent = "0";
+        livesEl.textContent = "3";
+        statusEl.textContent = "Click only the target number.";
+        newTarget();
+        clearInterval(spawnTimer);
+        spawnTimer = setInterval(spawnDrop, 850);
+      });
+    </script>
+  </body>
+</html>

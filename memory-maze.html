@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Memory Maze</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Space+Grotesk:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "Space Grotesk", sans-serif;
+        background:
+          radial-gradient(circle at top, rgba(255,255,255,0.65), transparent 30%),
+          linear-gradient(180deg, #edf7ef, #dff0e0);
+        color: #102314;
+      }
+      .page {
+        width: min(760px, calc(100% - 24px));
+        margin: 0 auto;
+        padding: 18px 0 28px;
+      }
+      .back {
+        display: inline-block;
+        margin-bottom: 18px;
+        color: #36543b;
+        text-decoration: none;
+        font-weight: 700;
+      }
+      .hero {
+        text-align: center;
+        margin-bottom: 12px;
+      }
+      .hero h1 {
+        margin: 0 0 8px;
+        font-family: "Gaegu", cursive;
+        font-size: clamp(3rem, 8vw, 5rem);
+      }
+      .hero p {
+        margin: 0;
+        color: #4c6a51;
+      }
+      .panel {
+        background: white;
+        border: 2px solid #b9d0bd;
+        border-radius: 22px;
+        padding: 16px;
+        box-shadow: 0 18px 40px rgba(16, 35, 20, 0.08);
+        position: relative;
+        overflow: hidden;
+      }
+      .panel::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+          linear-gradient(90deg, transparent 0 24%, rgba(22,163,74,0.04) 24% 25%, transparent 25% 49%, rgba(22,163,74,0.04) 49% 50%, transparent 50% 74%, rgba(22,163,74,0.04) 74% 75%, transparent 75% 100%),
+          linear-gradient(180deg, transparent 0 24%, rgba(22,163,74,0.04) 24% 25%, transparent 25% 49%, rgba(22,163,74,0.04) 49% 50%, transparent 50% 74%, rgba(22,163,74,0.04) 74% 75%, transparent 75% 100%);
+        pointer-events: none;
+      }
+      .meta {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 12px;
+        position: relative;
+        z-index: 1;
+      }
+      .maze {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 8px;
+        position: relative;
+        z-index: 1;
+      }
+      .tile {
+        aspect-ratio: 1 / 0.88;
+        border-radius: 14px;
+        border: 2px solid #bfd6c3;
+        background: linear-gradient(180deg, #f7fcf7, #edf7ee);
+        cursor: pointer;
+        transition: transform 120ms ease, background 120ms ease, border-color 120ms ease, box-shadow 120ms ease;
+        box-shadow: inset 0 -6px 12px rgba(16,35,20,0.04);
+      }
+      .tile.show {
+        background: #16a34a;
+        border-color: #16a34a;
+        box-shadow: 0 0 18px rgba(22,163,74,0.35);
+      }
+      .tile.good {
+        background: #4ade80;
+        border-color: #16a34a;
+      }
+      .tile.bad {
+        background: #f87171;
+        border-color: #dc2626;
+      }
+      .controls {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 12px;
+        align-items: center;
+        position: relative;
+        z-index: 1;
+      }
+      .button {
+        padding: 11px 16px;
+        border: 0;
+        border-radius: 12px;
+        background: linear-gradient(180deg, #102314, #1b3a20);
+        color: white;
+        cursor: pointer;
+        font-weight: 700;
+      }
+      .status {
+        min-height: 1.6em;
+        color: #4c6a51;
+      }
+      @media (max-width: 640px) {
+        .maze { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .meta, .controls { flex-direction: column; align-items: stretch; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <a class="back" href="index.html">&larr; Back to home</a>
+      <header class="hero">
+        <h1>Memory Maze</h1>
+        <p>Watch the route, then repeat it tile by tile.</p>
+      </header>
+
+      <section class="panel">
+        <div class="meta">
+          <p>Round: <strong id="round">1</strong></p>
+          <p>Longest route: <strong id="best">0</strong></p>
+        </div>
+
+        <div class="maze" id="maze"></div>
+
+        <div class="controls">
+          <p class="status" id="status">Press start to watch the first route.</p>
+          <button class="button" id="start" type="button">Start round</button>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const maze = document.getElementById("maze");
+      const statusEl = document.getElementById("status");
+      const roundEl = document.getElementById("round");
+      const bestEl = document.getElementById("best");
+      const startButton = document.getElementById("start");
+
+      const size = 12;
+      const tiles = [];
+      let sequence = [];
+      let playerIndex = 0;
+      let round = 1;
+      let best = 0;
+      let accepting = false;
+
+      for (let i = 0; i < size; i += 1) {
+        const tile = document.createElement("button");
+        tile.type = "button";
+        tile.className = "tile";
+        tile.addEventListener("click", () => handleTile(i));
+        tiles.push(tile);
+        maze.appendChild(tile);
+      }
+
+      function randomTile() {
+        return Math.floor(Math.random() * size);
+      }
+
+      function resetTileStates() {
+        tiles.forEach((tile) => {
+          tile.classList.remove("show", "good", "bad");
+        });
+      }
+
+      async function playSequence() {
+        accepting = false;
+        statusEl.textContent = "Watch carefully...";
+        resetTileStates();
+
+        for (const index of sequence) {
+          tiles[index].classList.add("show");
+          await new Promise((resolve) => setTimeout(resolve, 500));
+          tiles[index].classList.remove("show");
+          await new Promise((resolve) => setTimeout(resolve, 180));
+        }
+
+        playerIndex = 0;
+        accepting = true;
+        statusEl.textContent = "Your turn. Repeat the route.";
+      }
+
+      function startRound() {
+        resetTileStates();
+        sequence.push(randomTile());
+        roundEl.textContent = String(sequence.length);
+        playSequence();
+      }
+
+      function handleTile(index) {
+        if (!accepting) return;
+
+        if (index === sequence[playerIndex]) {
+          tiles[index].classList.add("good");
+          window.setTimeout(() => tiles[index].classList.remove("good"), 180);
+          playerIndex += 1;
+
+          if (playerIndex === sequence.length) {
+            best = Math.max(best, sequence.length);
+            bestEl.textContent = String(best);
+            accepting = false;
+            statusEl.textContent = "Nice. The route just got longer.";
+            window.setTimeout(startRound, 700);
+          }
+          return;
+        }
+
+        tiles[index].classList.add("bad");
+        accepting = false;
+        statusEl.textContent = "Wrong turn. The maze resets.";
+        sequence = [];
+        round = 1;
+        roundEl.textContent = "1";
+      }
+
+      startButton.addEventListener("click", () => {
+        sequence = [];
+        best = 0;
+        bestEl.textContent = "0";
+        roundEl.textContent = "1";
+        startRound();
+      });
+    </script>
+  </body>
+</html>

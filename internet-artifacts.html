@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Internet Artifacts</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;700&family=Gaegu:wght@400;700&family=Space+Grotesk:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "Space Grotesk", sans-serif;
+        background: linear-gradient(180deg, #f6ead9, #ead6be);
+        color: #5b4332;
+      }
+      .page {
+        width: min(920px, calc(100% - 24px));
+        margin: 0 auto;
+        padding: 24px 0 40px;
+      }
+      .back {
+        display: inline-block;
+        margin-bottom: 18px;
+        color: #6b4c37;
+        text-decoration: none;
+        font-weight: 700;
+      }
+      .hero {
+        text-align: center;
+        margin-bottom: 18px;
+      }
+      .hero h1 {
+        margin: 0 0 8px;
+        font-family: "Cormorant Garamond", serif;
+        font-size: clamp(3rem, 8vw, 5rem);
+        line-height: 0.95;
+      }
+      .hero p {
+        margin: 0;
+        color: #7a5a43;
+      }
+      .panel {
+        background: rgba(255,255,255,0.72);
+        border: 2px solid #c9b39a;
+        border-radius: 22px;
+        padding: 20px;
+        box-shadow: 0 18px 40px rgba(91, 67, 50, 0.08);
+      }
+      .artifact-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+      }
+      .artifact {
+        padding: 18px 14px;
+        border-radius: 18px;
+        border: 2px solid #d9c4ab;
+        background: rgba(255, 251, 245, 0.9);
+      }
+      .artifact .year {
+        display: inline-block;
+        margin-bottom: 10px;
+        padding: 4px 8px;
+        border-radius: 999px;
+        background: #efe1cf;
+        font-size: 0.78rem;
+        font-weight: 700;
+      }
+      .artifact h2 {
+        margin: 0 0 8px;
+        font-size: 1.15rem;
+      }
+      .artifact p {
+        margin: 0;
+        color: #7a5a43;
+        line-height: 1.45;
+      }
+      @media (max-width: 720px) {
+        .artifact-grid { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <a class="back" href="index.html">&larr; Back to home</a>
+      <header class="hero">
+        <h1>Internet Artifacts</h1>
+        <p>A tiny museum of beloved old-web leftovers and digital fossils.</p>
+      </header>
+
+      <section class="panel">
+        <div class="artifact-grid">
+          <article class="artifact">
+            <span class="year">1999</span>
+            <h2>Visitor Counter</h2>
+            <p>Seven glitter digits proving the page was definitely popular.</p>
+          </article>
+          <article class="artifact">
+            <span class="year">2002</span>
+            <h2>Under Construction GIF</h2>
+            <p>The universal symbol for ambition outrunning available time.</p>
+          </article>
+          <article class="artifact">
+            <span class="year">2004</span>
+            <h2>MIDI Background Song</h2>
+            <p>A page theme you did not ask for and could not easily escape.</p>
+          </article>
+          <article class="artifact">
+            <span class="year">2007</span>
+            <h2>Shiny Forum Signature</h2>
+            <p>Half quote, half badge collection, half emotional autobiography.</p>
+          </article>
+          <article class="artifact">
+            <span class="year">2011</span>
+            <h2>Reaction Face Folder</h2>
+            <p>A priceless archive of tiny JPEG emotions used in every argument.</p>
+          </article>
+          <article class="artifact">
+            <span class="year">2014</span>
+            <h2>Mystery Download Toolbar</h2>
+            <p>Installed accidentally, removed spiritually, remembered forever.</p>
+          </article>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

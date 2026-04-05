@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reaction Window</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Press+Start+2P&family=Space+Grotesk:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "Space Grotesk", sans-serif;
+        background:
+          radial-gradient(circle at top, rgba(255,255,255,0.1), transparent 24%),
+          linear-gradient(180deg, #090909, #1a1a1a 48%, #252525);
+        color: #f7f7f7;
+      }
+      .page {
+        width: min(900px, calc(100% - 24px));
+        margin: 0 auto;
+        padding: 24px 0 40px;
+      }
+      .back {
+        display: inline-block;
+        margin-bottom: 18px;
+        color: rgba(255,255,255,0.8);
+        text-decoration: none;
+        font-weight: 700;
+      }
+      .hero {
+        text-align: center;
+        margin-bottom: 18px;
+      }
+      .hero h1 {
+        margin: 0 0 8px;
+        font-family: "Gaegu", cursive;
+        font-size: clamp(3rem, 8vw, 5rem);
+      }
+      .hero p {
+        margin: 0;
+        color: rgba(255,255,255,0.72);
+      }
+      .panel {
+        background: linear-gradient(180deg, rgba(24,24,24,0.95), rgba(10,10,10,0.98));
+        border: 2px solid rgba(255,255,255,0.08);
+        border-radius: 26px;
+        padding: 22px;
+        box-shadow: 0 24px 60px rgba(0,0,0,0.35);
+      }
+      .board {
+        display: grid;
+        place-items: center;
+        gap: 18px;
+        min-height: 420px;
+        border-radius: 22px;
+        background:
+          radial-gradient(circle at top, rgba(255,255,255,0.05), transparent 28%),
+          linear-gradient(180deg, #181818, #090909);
+      }
+      .light {
+        width: 128px;
+        height: 128px;
+        border-radius: 50%;
+        background: #671c23;
+        box-shadow: 0 0 40px rgba(255, 66, 84, 0.18);
+        transition: background 140ms ease, box-shadow 140ms ease, transform 140ms ease;
+      }
+      .light.ready {
+        background: #9af550;
+        box-shadow: 0 0 48px rgba(154,245,80,0.55);
+        transform: scale(1.03);
+      }
+      .status {
+        max-width: 28ch;
+        text-align: center;
+        color: rgba(255,255,255,0.76);
+      }
+      .button {
+        padding: 12px 18px;
+        border: 0;
+        border-radius: 12px;
+        background: linear-gradient(180deg, #ffffff, #d5d5d5);
+        color: #111111;
+        cursor: pointer;
+        font-weight: 700;
+      }
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+        margin-top: 16px;
+      }
+      .stat {
+        padding: 14px;
+        border-radius: 18px;
+        background: rgba(255,255,255,0.06);
+      }
+      .stat span {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 0.82rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: rgba(255,255,255,0.52);
+      }
+      .stat strong {
+        font-size: 1.35rem;
+      }
+      @media (max-width: 640px) {
+        .board { min-height: 340px; }
+        .stats { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <a class="back" href="index.html">&larr; Back to home</a>
+      <header class="hero">
+        <h1>Reaction Window</h1>
+        <p>Wait in the dark. Strike only when the signal flips green.</p>
+      </header>
+
+      <section class="panel">
+        <div class="board">
+          <div class="light" id="reaction-light"></div>
+          <p class="status" id="reaction-status">Press start when you're ready.</p>
+          <button class="button" id="reaction-button" type="button">Start</button>
+        </div>
+
+        <div class="stats">
+          <div class="stat">
+            <span>Best</span>
+            <strong id="best-time">-</strong>
+          </div>
+          <div class="stat">
+            <span>Last</span>
+            <strong id="last-time">-</strong>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      document.getElementById("reaction-light").classList.add("reaction-light");
+      document.getElementById("reaction-status").classList.add("reaction-status");
+      document.getElementById("reaction-button").classList.add("mini-button", "strong");
+    </script>
+    <script src="script.js"></script>
+  </body>
+</html>

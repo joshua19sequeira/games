@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Where Would You Be Born?</title>
+    <style>
+      :root {
+        --bg: #f7f7f4;
+        --panel: rgba(255, 255, 255, 0.82);
+        --panel-strong: rgba(255, 255, 255, 0.94);
+        --text: #0f1720;
+        --muted: #62707c;
+        --line: rgba(15, 23, 32, 0.08);
+        --accent: #1b84ff;
+        --shadow: 0 20px 60px rgba(15, 23, 32, 0.08);
+      }
+
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        color: var(--text);
+        font-family:
+          -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
+          "Segoe UI", sans-serif;
+        background:
+          radial-gradient(circle at top, rgba(27, 132, 255, 0.08), transparent 24%),
+          linear-gradient(180deg, #ffffff, var(--bg) 42%, #f3f5f7 100%);
+      }
+
+      a { color: inherit; text-decoration: none; }
+
+      .page {
+        width: min(1120px, calc(100% - 24px));
+        margin: 0 auto;
+        padding: 20px 0 48px;
+      }
+
+      .back {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        color: var(--muted);
+        font-weight: 600;
+      }
+
+      .hero {
+        padding: 48px 0 26px;
+        text-align: center;
+      }
+
+      .eyebrow {
+        margin: 0 0 0.9rem;
+        color: var(--muted);
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      .hero h1 {
+        margin: 0;
+        font-size: clamp(2.8rem, 6vw, 5.3rem);
+        line-height: 0.92;
+        letter-spacing: -0.05em;
+        font-weight: 700;
+      }
+
+      .hero-copy {
+        max-width: 58ch;
+        margin: 1rem auto 0;
+        color: var(--muted);
+        font-size: 1.05rem;
+        line-height: 1.6;
+      }
+
+      .hero-actions {
+        display: flex;
+        justify-content: center;
+        gap: 0.8rem;
+        flex-wrap: wrap;
+        margin-top: 1.5rem;
+      }
+
+      .button,
+      .ghost-button {
+        border: 0;
+        border-radius: 999px;
+        padding: 0.95rem 1.3rem;
+        cursor: pointer;
+        font: inherit;
+        font-weight: 700;
+        transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+      }
+
+      .button:hover,
+      .ghost-button:hover { transform: translateY(-2px); }
+
+      .button {
+        background: linear-gradient(180deg, #2d93ff, #1b84ff);
+        color: white;
+        box-shadow: 0 14px 34px rgba(27, 132, 255, 0.22);
+      }
+
+      .ghost-button {
+        background: rgba(255, 255, 255, 0.7);
+        color: var(--text);
+        box-shadow: inset 0 0 0 1px var(--line);
+      }
+
+      .result-shell { display: grid; gap: 18px; }
+
+      .hero-panel,
+      .stats-panel,
+      .snapshot-panel,
+      .compare-panel,
+      .reflection {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 28px;
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(18px);
+      }
+
+      .hero-panel {
+        overflow: hidden;
+        padding: 28px;
+        background:
+          radial-gradient(circle at top right, rgba(27, 132, 255, 0.12), transparent 22%),
+          var(--panel-strong);
+      }
+
+      .result-top {
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
+        gap: 20px;
+        align-items: center;
+      }
+
+      .country-display {
+        min-height: 240px;
+        display: grid;
+        align-content: center;
+        gap: 0.7rem;
+      }
+
+      .country-code {
+        color: var(--text);
+        font-size: clamp(2rem, 4vw, 3.2rem);
+        font-weight: 500;
+        letter-spacing: -0.08em;
+        text-transform: uppercase;
+      }
+
+      .country-name {
+        margin: 0;
+        font-size: clamp(2.5rem, 5vw, 4.3rem);
+        line-height: 0.95;
+        letter-spacing: -0.05em;
+      }
+
+      .country-region { color: var(--muted); font-size: 1rem; }
+      .country-summary { color: var(--muted); line-height: 1.6; max-width: 46ch; }
+
+      .globe-card {
+        position: relative;
+        min-height: 250px;
+        padding: 18px;
+        border-radius: 24px;
+        overflow: hidden;
+        background:
+          radial-gradient(circle at 50% 30%, rgba(255, 255, 255, 0.7), transparent 18%),
+          linear-gradient(180deg, #edf5ff, #dbeafe);
+        box-shadow: inset 0 0 0 1px rgba(27, 132, 255, 0.08);
+      }
+
+      .flag-stage {
+        position: absolute;
+        top: 18px;
+        left: 18px;
+        right: 18px;
+        display: flex;
+        justify-content: center;
+        pointer-events: none;
+        z-index: 2;
+      }
+
+      .flag-frame {
+        width: min(240px, 64%);
+        aspect-ratio: 4 / 3;
+        overflow: hidden;
+        border-radius: 22px;
+        background: rgba(255, 255, 255, 0.9);
+        box-shadow:
+          inset 0 0 0 1px rgba(15, 23, 32, 0.06),
+          0 16px 32px rgba(27, 132, 255, 0.12);
+        opacity: 0;
+        transform: translateY(10px) scale(0.98);
+        transition: opacity 300ms ease, transform 300ms ease;
+      }
+
+      .flag-frame.ready {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+
+      .flag-frame img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .globe {
+        position: absolute;
+        inset: 50% auto auto 50%;
+        width: 180px;
+        height: 180px;
+        translate: -50% -42%;
+        border-radius: 50%;
+        background:
+          radial-gradient(circle at 32% 34%, #8ad06c 0 14%, transparent 15%),
+          radial-gradient(circle at 58% 44%, #83c865 0 12%, transparent 13%),
+          radial-gradient(circle at 46% 64%, #8ed76d 0 10%, transparent 11%),
+          linear-gradient(180deg, #8ed0ff, #53aefc);
+        box-shadow:
+          inset -14px -18px 32px rgba(255, 255, 255, 0.26),
+          0 20px 40px rgba(27, 132, 255, 0.18);
+      }
+
+      .globe::before,
+      .globe::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        border: 1px solid rgba(255, 255, 255, 0.45);
+      }
+
+      .globe::before { transform: scaleX(0.72); }
+      .globe::after { transform: scaleY(0.72); }
+      .globe.spinning { animation: spin 0.95s linear infinite; }
+
+      .map-note {
+        position: absolute;
+        left: 18px;
+        right: 18px;
+        bottom: 16px;
+        padding: 0.9rem 1rem;
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.72);
+        box-shadow: inset 0 0 0 1px rgba(27, 132, 255, 0.08);
+        color: var(--muted);
+        line-height: 1.5;
+        z-index: 3;
+      }
+
+      .stats-panel { padding: 22px; }
+      .panel-title { margin: 0 0 16px; font-size: 1.35rem; letter-spacing: -0.03em; }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .stat-card {
+        padding: 16px;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.68);
+        box-shadow: inset 0 0 0 1px rgba(15, 23, 32, 0.06);
+        opacity: 0;
+        transform: translateY(12px);
+        transition: opacity 420ms ease, transform 420ms ease;
+      }
+
+      .stat-card.visible { opacity: 1; transform: translateY(0); }
+      .stat-label {
+        display: block;
+        margin-bottom: 8px;
+        color: var(--muted);
+        font-size: 0.8rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        font-weight: 700;
+      }
+      .stat-value { font-size: 1.35rem; font-weight: 700; letter-spacing: -0.03em; }
+
+      .snapshot-panel,
+      .compare-panel,
+      .reflection { padding: 22px; }
+
+      .snapshot-text {
+        margin: 0;
+        color: var(--muted);
+        font-size: 1.04rem;
+        line-height: 1.7;
+      }
+
+      .score-block { margin-top: 18px; }
+
+      .score-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 10px;
+        align-items: end;
+      }
+
+      .score-bar {
+        width: 100%;
+        height: 14px;
+        overflow: hidden;
+        border-radius: 999px;
+        background: rgba(15, 23, 32, 0.08);
+      }
+
+      .score-fill {
+        height: 100%;
+        width: 0;
+        border-radius: 999px;
+        background: linear-gradient(90deg, #60a5fa, #22c55e);
+        transition: width 620ms cubic-bezier(.2,.8,.2,1);
+      }
+
+      .compare-grid {
+        display: grid;
+        grid-template-columns: 1.1fr 1fr 1fr;
+        gap: 12px;
+      }
+
+      .compare-head,
+      .compare-cell {
+        padding: 14px 16px;
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.68);
+        box-shadow: inset 0 0 0 1px rgba(15, 23, 32, 0.06);
+      }
+
+      .compare-head {
+        font-size: 0.82rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--muted);
+        font-weight: 700;
+      }
+
+      .compare-cell strong { display: block; font-size: 1.08rem; letter-spacing: -0.02em; }
+      .compare-cell span { color: var(--muted); font-size: 0.92rem; }
+
+      .reflection {
+        text-align: center;
+        color: var(--muted);
+        line-height: 1.7;
+      }
+
+      .hidden { opacity: 0; transform: translateY(14px); }
+      .revealed {
+        opacity: 1;
+        transform: translateY(0);
+        transition: opacity 460ms ease, transform 460ms ease;
+      }
+
+      @keyframes spin {
+        from { rotate: 0deg; }
+        to { rotate: 360deg; }
+      }
+
+      @media (max-width: 980px) {
+        .result-top,
+        .stats-grid,
+        .compare-grid { grid-template-columns: 1fr; }
+
+        .globe-card {
+          min-height: 300px;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .page { width: min(100% - 16px, 1120px); }
+        .hero { padding-top: 28px; }
+        .flag-frame { width: min(220px, 76%); }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <a class="back" href="home.html">&larr; Back to home</a>
+      <header class="hero">
+        <p class="eyebrow">A global thought experiment</p>
+        <h1>Where Would You Be Born?</h1>
+        <p class="hero-copy">
+          A quiet little simulation about chance, geography, and the strange weight of circumstance.
+          Press once and let the world decide.
+        </p>
+        <div class="hero-actions">
+          <button class="button" id="spawn-button" type="button">Spawn Me</button>
+          <button class="ghost-button" id="spawn-again" type="button">Spawn Again</button>
+        </div>
+      </header>
+
+      <section class="result-shell">
+        <section class="hero-panel hidden" id="hero-panel">
+          <div class="result-top">
+            <div class="country-display">
+              <div class="country-code" id="country-flag">--</div>
+              <h2 class="country-name" id="country-name">Somewhere on Earth</h2>
+              <div class="country-region" id="country-region">Waiting for your first spawn...</div>
+              <p class="country-summary" id="country-summary">
+                Population-weighted spawning means larger countries appear more often, just like real life.
+              </p>
+            </div>
+
+            <div class="globe-card">
+              <div class="flag-stage">
+                <div class="flag-frame" id="visual-flag"></div>
+              </div>
+              <div class="globe" id="globe"></div>
+              <p class="map-note" id="map-note">
+                A rough world spotlight for your selected country will appear here.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section class="stats-panel hidden" id="stats-panel">
+          <h3 class="panel-title">Life Statistics</h3>
+          <div class="stats-grid" id="stats-grid"></div>
+        </section>
+
+        <section class="snapshot-panel hidden" id="snapshot-panel">
+          <h3 class="panel-title">Life Snapshot</h3>
+          <p class="snapshot-text" id="snapshot-text">
+            Your likely life story will appear here after the first spawn.
+          </p>
+
+          <div class="score-block">
+            <div class="score-head">
+              <div>
+                <p class="eyebrow">Luck Meter</p>
+                <strong id="score-label">Life Score</strong>
+              </div>
+              <strong id="score-number">0 / 100</strong>
+            </div>
+            <div class="score-bar">
+              <div class="score-fill" id="score-fill"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="compare-panel hidden" id="compare-panel">
+          <h3 class="panel-title">Compare with India</h3>
+          <div class="compare-grid" id="compare-grid"></div>
+        </section>
+
+        <section class="reflection hidden" id="reflection">
+          <p>Where you are born can shape your opportunities more than you think.</p>
+        </section>
+      </section>
+    </main>
+
+    <script>
+      const countries = [
+        { name: "India", code: "in", region: "South Asia", populationWeight: 1430, lifeExpectancy: 67, averageIncome: 2600, costOfLiving: 32, literacyRate: 78, internetAccess: 52, healthcareQuality: 61, safetyIndex: 56, happinessScore: 4.0, mapNote: "Born into the world's largest population, with huge diversity in opportunity depending on region, class, and city." },
+        { name: "China", code: "cn", region: "East Asia", populationWeight: 1410, lifeExpectancy: 78, averageIncome: 12800, costOfLiving: 44, literacyRate: 97, internetAccess: 76, healthcareQuality: 72, safetyIndex: 74, happinessScore: 5.8, mapNote: "A high-population birthplace with strong infrastructure, rapid growth, and a very different digital life than much of the world." },
+        { name: "United States", code: "us", region: "North America", populationWeight: 335, lifeExpectancy: 77, averageIncome: 76000, costOfLiving: 68, literacyRate: 99, internetAccess: 92, healthcareQuality: 69, safetyIndex: 50, happinessScore: 6.9, mapNote: "High average income and high access, but outcomes can vary sharply depending on healthcare, housing, and zip code." },
+        { name: "Indonesia", code: "id", region: "Southeast Asia", populationWeight: 278, lifeExpectancy: 71, averageIncome: 5000, costOfLiving: 34, literacyRate: 96, internetAccess: 69, healthcareQuality: 58, safetyIndex: 63, happinessScore: 5.3, mapNote: "Island life, growing connectivity, and a middle-income reality shaped by geography and uneven infrastructure." },
+        { name: "Pakistan", code: "pk", region: "South Asia", populationWeight: 242, lifeExpectancy: 67, averageIncome: 1700, costOfLiving: 24, literacyRate: 62, internetAccess: 36, healthcareQuality: 47, safetyIndex: 57, happinessScore: 4.5, mapNote: "A young population, lower internet access, and a life path strongly shaped by education and regional conditions." },
+        { name: "Nigeria", code: "ng", region: "West Africa", populationWeight: 227, lifeExpectancy: 55, averageIncome: 2400, costOfLiving: 28, literacyRate: 62, internetAccess: 43, healthcareQuality: 40, safetyIndex: 46, happinessScore: 4.9, mapNote: "One of the world's youngest and fastest-growing populations, with huge energy but uneven life conditions." },
+        { name: "Brazil", code: "br", region: "South America", populationWeight: 203, lifeExpectancy: 75, averageIncome: 9200, costOfLiving: 41, literacyRate: 94, internetAccess: 81, healthcareQuality: 62, safetyIndex: 42, happinessScore: 6.1, mapNote: "A vibrant birth lottery with stronger connectivity and social life, but also sharper safety variation by location." },
+        { name: "Bangladesh", code: "bd", region: "South Asia", populationWeight: 173, lifeExpectancy: 73, averageIncome: 3100, costOfLiving: 26, literacyRate: 76, internetAccess: 44, healthcareQuality: 53, safetyIndex: 54, happinessScore: 5.0, mapNote: "Dense, fast-changing, and often more resilient than outsiders expect, with affordability but mixed infrastructure." },
+        { name: "Russia", code: "ru", region: "Eastern Europe", populationWeight: 144, lifeExpectancy: 72, averageIncome: 14000, costOfLiving: 40, literacyRate: 99, internetAccess: 88, healthcareQuality: 60, safetyIndex: 59, happinessScore: 5.4, mapNote: "A country with strong education and connectivity, but social and political realities can shape life heavily." },
+        { name: "Mexico", code: "mx", region: "North America", populationWeight: 129, lifeExpectancy: 75, averageIncome: 13500, costOfLiving: 43, literacyRate: 95, internetAccess: 75, healthcareQuality: 61, safetyIndex: 47, happinessScore: 6.3, mapNote: "Affordable compared with rich countries, culturally rich, but with security and inequality shaping daily life." },
+        { name: "Japan", code: "jp", region: "East Asia", populationWeight: 123, lifeExpectancy: 84, averageIncome: 34000, costOfLiving: 62, literacyRate: 99, internetAccess: 94, healthcareQuality: 87, safetyIndex: 77, happinessScore: 6.1, mapNote: "Long life expectancy, excellent infrastructure, and social order, balanced against high pressure and cost." },
+        { name: "Philippines", code: "ph", region: "Southeast Asia", populationWeight: 117, lifeExpectancy: 71, averageIncome: 3900, costOfLiving: 33, literacyRate: 96, internetAccess: 73, healthcareQuality: 55, safetyIndex: 57, happinessScore: 5.9, mapNote: "Community-driven, highly online, and relatively affordable, though public systems can be uneven." },
+        { name: "Germany", code: "de", region: "Western Europe", populationWeight: 84, lifeExpectancy: 81, averageIncome: 52000, costOfLiving: 63, literacyRate: 99, internetAccess: 93, healthcareQuality: 86, safetyIndex: 65, happinessScore: 6.9, mapNote: "A strong social system, high healthcare quality, and relatively stable public life shape the odds here." },
+        { name: "France", code: "fr", region: "Western Europe", populationWeight: 68, lifeExpectancy: 82, averageIncome: 47000, costOfLiving: 64, literacyRate: 99, internetAccess: 92, healthcareQuality: 85, safetyIndex: 61, happinessScore: 6.7, mapNote: "Long lifespans and strong healthcare help, though cost and urban stress still shape the experience." },
+        { name: "United Kingdom", code: "gb", region: "Western Europe", populationWeight: 67, lifeExpectancy: 81, averageIncome: 46000, costOfLiving: 66, literacyRate: 99, internetAccess: 95, healthcareQuality: 80, safetyIndex: 60, happinessScore: 6.8, mapNote: "Highly connected and institutionally strong, but with sharp differences in wealth, housing, and local opportunity." },
+        { name: "Thailand", code: "th", region: "Southeast Asia", populationWeight: 71, lifeExpectancy: 78, averageIncome: 7800, costOfLiving: 39, literacyRate: 94, internetAccess: 85, healthcareQuality: 73, safetyIndex: 64, happinessScore: 6.0, mapNote: "A relatively affordable birthplace with strong internet access, decent healthcare, and a gentler cost curve." },
+        { name: "Canada", code: "ca", region: "North America", populationWeight: 40, lifeExpectancy: 82, averageIncome: 59000, costOfLiving: 67, literacyRate: 99, internetAccess: 95, healthcareQuality: 84, safetyIndex: 71, happinessScore: 7.0, mapNote: "A strong quality-of-life baseline with safety, healthcare, and education all helping the odds." },
+        { name: "Australia", code: "au", region: "Oceania", populationWeight: 27, lifeExpectancy: 83, averageIncome: 63000, costOfLiving: 69, literacyRate: 99, internetAccess: 96, healthcareQuality: 86, safetyIndex: 72, happinessScore: 7.1, mapNote: "A strong draw in the birth lottery: long lives, high income, good safety, and broad digital access." },
+        { name: "Sweden", code: "se", region: "Northern Europe", populationWeight: 10, lifeExpectancy: 83, averageIncome: 61000, costOfLiving: 71, literacyRate: 99, internetAccess: 98, healthcareQuality: 88, safetyIndex: 74, happinessScore: 7.4, mapNote: "A small-population but high-opportunity outcome, with strong social protection and very high digital inclusion." }
+      ];
+
+      const india = countries.find((country) => country.name === "India");
+      const statConfig = [
+        { key: "lifeExpectancy", label: "Life Expectancy", format: (value) => `${value} years` },
+        { key: "averageIncome", label: "Average Income", format: (value) => money(value) },
+        { key: "costOfLiving", label: "Cost of Living", format: (value) => `${value} / 100` },
+        { key: "literacyRate", label: "Literacy Rate", format: (value) => `${value}%` },
+        { key: "internetAccess", label: "Internet Access", format: (value) => `${value}%` },
+        { key: "healthcareQuality", label: "Healthcare Quality", format: (value) => `${value} / 100` },
+        { key: "safetyIndex", label: "Safety Index", format: (value) => `${value} / 100` },
+        { key: "happinessScore", label: "Happiness Score", format: (value) => `${value} / 10` }
+      ];
+
+      const heroPanel = document.getElementById("hero-panel");
+      const statsPanel = document.getElementById("stats-panel");
+      const snapshotPanel = document.getElementById("snapshot-panel");
+      const comparePanel = document.getElementById("compare-panel");
+      const reflection = document.getElementById("reflection");
+      const spawnButton = document.getElementById("spawn-button");
+      const spawnAgainButton = document.getElementById("spawn-again");
+      const countryFlag = document.getElementById("country-flag");
+      const countryName = document.getElementById("country-name");
+      const countryRegion = document.getElementById("country-region");
+      const countrySummary = document.getElementById("country-summary");
+      const mapNote = document.getElementById("map-note");
+      const visualFlag = document.getElementById("visual-flag");
+      const statsGrid = document.getElementById("stats-grid");
+      const snapshotText = document.getElementById("snapshot-text");
+      const scoreNumber = document.getElementById("score-number");
+      const scoreFill = document.getElementById("score-fill");
+      const compareGrid = document.getElementById("compare-grid");
+      const globe = document.getElementById("globe");
+
+      function money(value) {
+        return new Intl.NumberFormat("en-US", {
+          style: "currency",
+          currency: "USD",
+          maximumFractionDigits: 0
+        }).format(value);
+      }
+
+      function weightedCountry() {
+        const totalWeight = countries.reduce((sum, country) => sum + country.populationWeight, 0);
+        let roll = Math.random() * totalWeight;
+        for (const country of countries) {
+          roll -= country.populationWeight;
+          if (roll <= 0) return country;
+        }
+        return countries[countries.length - 1];
+      }
+
+      function computeLifeScore(country) {
+        const score =
+          country.lifeExpectancy * 0.18 +
+          Math.min(country.averageIncome / 1000, 100) * 0.16 +
+          country.literacyRate * 0.12 +
+          country.internetAccess * 0.12 +
+          country.healthcareQuality * 0.16 +
+          country.safetyIndex * 0.12 +
+          country.happinessScore * 10 * 0.14;
+        return Math.round(Math.min(100, score));
+      }
+
+      function qualityWord(country) {
+        if (country.healthcareQuality >= 82) return "strong";
+        if (country.healthcareQuality >= 62) return "moderate";
+        return "limited";
+      }
+
+      function incomeWord(country) {
+        if (country.averageIncome >= 45000) return "high";
+        if (country.averageIncome >= 10000) return "middle";
+        return "low";
+      }
+
+      function safetyWord(country) {
+        if (country.safetyIndex >= 70) return "fairly safe";
+        if (country.safetyIndex >= 55) return "reasonably stable";
+        return "less predictable";
+      }
+
+      function internetWord(country) {
+        if (country.internetAccess >= 90) return "broad";
+        if (country.internetAccess >= 65) return "solid";
+        return "moderate";
+      }
+
+      function makeSnapshot(country) {
+        return `You are likely to live around ${country.lifeExpectancy} years, grow up in a ${incomeWord(country)}-income environment, and experience ${internetWord(country)} internet access. Daily life would probably feel ${safetyWord(country)}, with ${qualityWord(country)} healthcare shaping how secure that future feels.`;
+      }
+
+      function reveal(section) {
+        section.classList.remove("hidden");
+        requestAnimationFrame(() => section.classList.add("revealed"));
+      }
+
+      function renderStats(country) {
+        statsGrid.innerHTML = "";
+        statConfig.forEach((stat, index) => {
+          const card = document.createElement("article");
+          card.className = "stat-card";
+          card.innerHTML = `<span class="stat-label">${stat.label}</span><strong class="stat-value">${stat.format(country[stat.key])}</strong>`;
+          statsGrid.appendChild(card);
+          window.setTimeout(() => card.classList.add("visible"), 130 * index);
+        });
+      }
+
+      function renderCompare(country) {
+        compareGrid.innerHTML = "";
+        ["Metric", country.name, "India"].forEach((label) => {
+          const node = document.createElement("div");
+          node.className = "compare-head";
+          node.textContent = label;
+          compareGrid.appendChild(node);
+        });
+
+        const compareKeys = ["lifeExpectancy", "averageIncome", "internetAccess", "healthcareQuality", "safetyIndex", "happinessScore"];
+        for (const key of compareKeys) {
+          const stat = statConfig.find((item) => item.key === key);
+          const nameCell = document.createElement("div");
+          nameCell.className = "compare-cell";
+          nameCell.innerHTML = `<strong>${stat.label}</strong><span>Side-by-side view</span>`;
+
+          const selectedCell = document.createElement("div");
+          selectedCell.className = "compare-cell";
+          selectedCell.innerHTML = `<strong>${stat.format(country[key])}</strong><span>${country.name}</span>`;
+
+          const indiaCell = document.createElement("div");
+          indiaCell.className = "compare-cell";
+          indiaCell.innerHTML = `<strong>${stat.format(india[key])}</strong><span>India</span>`;
+
+          compareGrid.append(nameCell, selectedCell, indiaCell);
+        }
+      }
+
+      function renderCountry(country) {
+        const score = computeLifeScore(country);
+        countryFlag.textContent = country.code.toUpperCase();
+        visualFlag.classList.remove("ready");
+        visualFlag.innerHTML = `<img src="assets/flags/${country.code}.png" alt="${country.name} flag">`;
+        window.setTimeout(() => visualFlag.classList.add("ready"), 80);
+        countryName.textContent = country.name;
+        countryRegion.textContent = country.region;
+        countrySummary.textContent = country.mapNote;
+        mapNote.textContent = `${country.name}: ${country.mapNote}`;
+        snapshotText.textContent = makeSnapshot(country);
+        scoreNumber.textContent = `${score} / 100`;
+        scoreFill.style.width = `${score}%`;
+        renderStats(country);
+        renderCompare(country);
+        [heroPanel, statsPanel, snapshotPanel, comparePanel, reflection].forEach(reveal);
+      }
+
+      function spawnCountry() {
+        globe.classList.add("spinning");
+        scoreFill.style.width = "0%";
+        visualFlag.classList.remove("ready");
+        [heroPanel, statsPanel, snapshotPanel, comparePanel, reflection].forEach((panel) => {
+          panel.classList.remove("revealed");
+          panel.classList.add("hidden");
+        });
+        window.setTimeout(() => {
+          const country = weightedCountry();
+          globe.classList.remove("spinning");
+          renderCountry(country);
+        }, 720);
+      }
+
+      spawnButton.addEventListener("click", spawnCountry);
+      spawnAgainButton.addEventListener("click", spawnCountry);
+    </script>
+  </body>
+</html>

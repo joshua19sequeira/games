@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Robot Check</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Space+Grotesk:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "Space Grotesk", sans-serif;
+        background:
+          radial-gradient(circle at top, rgba(255,255,255,0.9), transparent 30%),
+          linear-gradient(180deg, #f8fafc, #e8eef6);
+        color: #111827;
+      }
+      .page {
+        width: min(900px, calc(100% - 24px));
+        margin: 0 auto;
+        padding: 24px 0 40px;
+      }
+      .back {
+        display: inline-block;
+        margin-bottom: 18px;
+        color: #334155;
+        text-decoration: none;
+        font-weight: 700;
+      }
+      .hero {
+        text-align: center;
+        margin-bottom: 18px;
+      }
+      .hero h1 {
+        margin: 0 0 8px;
+        font-family: "Gaegu", cursive;
+        font-size: clamp(3rem, 8vw, 5rem);
+      }
+      .hero p {
+        margin: 0;
+        color: #64748b;
+      }
+      .panel {
+        background: white;
+        border: 2px solid #cbd5e1;
+        border-radius: 22px;
+        padding: 22px;
+        box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+        position: relative;
+        overflow: hidden;
+      }
+      .panel::before {
+        content: "";
+        position: absolute;
+        width: 180px;
+        height: 180px;
+        right: -50px;
+        top: -50px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(59,130,246,0.12), transparent 65%);
+      }
+      .captcha {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        padding: 18px;
+        border: 3px solid #a8b3c2;
+        border-radius: 20px;
+        background: #fcfcfd;
+        position: relative;
+        z-index: 1;
+      }
+      .checkbox {
+        width: 64px;
+        height: 64px;
+        border: 3px solid #a8b3c2;
+        border-radius: 10px;
+        background: white;
+        display: grid;
+        place-items: center;
+        cursor: pointer;
+        font-size: 2rem;
+        color: #16a34a;
+      }
+      .captcha-text {
+        font-size: clamp(1.6rem, 4vw, 2.4rem);
+      }
+      .mission {
+        margin-top: 18px;
+        padding: 18px;
+        border-radius: 18px;
+        background:
+          linear-gradient(180deg, rgba(255,255,255,0.7), rgba(248,250,252,0.95)),
+          #f8fafc;
+        border: 2px dashed #cbd5e1;
+        position: relative;
+        z-index: 1;
+      }
+      .mission h2 {
+        margin: 0 0 8px;
+        font-size: 1.4rem;
+      }
+      .options {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        margin-top: 16px;
+      }
+      .option {
+        padding: 18px 14px;
+        border-radius: 18px;
+        border: 2px solid #cbd5e1;
+        background: linear-gradient(180deg, #ffffff, #f8fafc);
+        cursor: pointer;
+        text-align: center;
+        font-weight: 700;
+        transition: transform 120ms ease, border-color 120ms ease, box-shadow 120ms ease;
+      }
+      .option:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+      }
+      .option.good {
+        border-color: #16a34a;
+        background: #f0fdf4;
+      }
+      .option.bad {
+        border-color: #ef4444;
+        background: #fef2f2;
+      }
+      .status {
+        margin-top: 16px;
+        min-height: 1.6em;
+        color: #475569;
+      }
+      .footer {
+        margin-top: 18px;
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: center;
+      }
+      .pill {
+        padding: 10px 14px;
+        border-radius: 999px;
+        background: linear-gradient(180deg, #111827, #1f2937);
+        color: white;
+        border: 0;
+        cursor: pointer;
+      }
+      @media (max-width: 640px) {
+        .options { grid-template-columns: 1fr; }
+        .captcha { flex-direction: column; align-items: flex-start; }
+        .footer { flex-direction: column; align-items: stretch; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <a class="back" href="index.html">&larr; Back to home</a>
+      <header class="hero">
+        <h1>Robot Check</h1>
+        <p>Prove you're human by making deeply human decisions.</p>
+      </header>
+
+      <section class="panel">
+        <div class="captcha">
+          <button class="checkbox" id="checkbox" type="button"></button>
+          <div class="captcha-text">I'm not a robot</div>
+        </div>
+
+        <div class="mission">
+          <h2 id="prompt">Click the box to begin verification.</h2>
+          <div class="options" id="options"></div>
+          <p class="status" id="status"></p>
+        </div>
+
+        <div class="footer">
+          <p>Steps cleared: <strong id="score">0</strong></p>
+          <button class="pill" id="reset" type="button">Reset check</button>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const checkbox = document.getElementById("checkbox");
+      const promptEl = document.getElementById("prompt");
+      const optionsEl = document.getElementById("options");
+      const statusEl = document.getElementById("status");
+      const scoreEl = document.getElementById("score");
+      const resetButton = document.getElementById("reset");
+
+      const rounds = [
+        {
+          prompt: "Select the image a real human would click after oversleeping.",
+          options: ["Coffee", "Quarterly earnings", "Two captchas at once", "Dust"],
+          answer: "Coffee",
+        },
+        {
+          prompt: "Pick the most suspiciously human browser tab.",
+          options: ["weather tomorrow", "how to fold fitted sheet", "beep boop", "kernel log"],
+          answer: "how to fold fitted sheet",
+        },
+        {
+          prompt: "Which of these is strongest evidence of humanity?",
+          options: ["Existential dread", "Perfect uptime", "Checksum", "Laser vision"],
+          answer: "Existential dread",
+        },
+      ];
+
+      let started = false;
+      let roundIndex = 0;
+
+      function renderRound() {
+        const round = rounds[roundIndex];
+        promptEl.textContent = round.prompt;
+        optionsEl.innerHTML = "";
+        statusEl.textContent = "";
+
+        for (const option of round.options) {
+          const button = document.createElement("button");
+          button.className = "option";
+          button.type = "button";
+          button.textContent = option;
+          button.addEventListener("click", () => handleChoice(button, option));
+          optionsEl.appendChild(button);
+        }
+      }
+
+      function handleChoice(button, option) {
+        const round = rounds[roundIndex];
+        const buttons = optionsEl.querySelectorAll(".option");
+        buttons.forEach((item) => (item.disabled = true));
+
+        if (option === round.answer) {
+          button.classList.add("good");
+          roundIndex += 1;
+          scoreEl.textContent = String(roundIndex);
+
+          if (roundIndex >= rounds.length) {
+            checkbox.textContent = "✓";
+            promptEl.textContent = "Verification complete.";
+            statusEl.textContent = "You are officially 98% human and 2% caffeine.";
+            optionsEl.innerHTML = "";
+            return;
+          }
+
+          statusEl.textContent = "Reasonable human choice. Continuing scan...";
+          window.setTimeout(renderRound, 900);
+        } else {
+          button.classList.add("bad");
+          statusEl.textContent = "That felt suspiciously robotic. Try again.";
+          checkbox.textContent = "";
+          started = false;
+          roundIndex = 0;
+          scoreEl.textContent = "0";
+        }
+      }
+
+      checkbox.addEventListener("click", () => {
+        if (started) return;
+        started = true;
+        checkbox.textContent = "✓";
+        renderRound();
+      });
+
+      resetButton.addEventListener("click", () => {
+        started = false;
+        roundIndex = 0;
+        checkbox.textContent = "";
+        scoreEl.textContent = "0";
+        promptEl.textContent = "Click the box to begin verification.";
+        optionsEl.innerHTML = "";
+        statusEl.textContent = "";
+      });
+    </script>
+  </body>
+</html>

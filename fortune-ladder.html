@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fortune Ladder</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Gaegu:wght@400;700&family=Space+Grotesk:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "Space Grotesk", sans-serif;
+        background:
+          radial-gradient(circle at top, rgba(255,255,255,0.24), transparent 28%),
+          linear-gradient(180deg, #42113c, #5a1230 48%, #f17105);
+        color: #fff8f0;
+      }
+      .page {
+        width: min(940px, calc(100% - 24px));
+        margin: 0 auto;
+        padding: 24px 0 40px;
+      }
+      .back {
+        display: inline-block;
+        margin-bottom: 18px;
+        color: rgba(255,248,240,0.85);
+        text-decoration: none;
+        font-weight: 700;
+      }
+      .hero {
+        text-align: center;
+        margin-bottom: 18px;
+      }
+      .hero h1 {
+        margin: 0 0 8px;
+        font-family: "Cormorant Garamond", serif;
+        font-size: clamp(3rem, 8vw, 5rem);
+        line-height: 0.95;
+      }
+      .hero p {
+        margin: 0;
+        color: rgba(255,248,240,0.78);
+      }
+      .panel {
+        background: rgba(62, 12, 45, 0.4);
+        border: 2px solid rgba(255,255,255,0.16);
+        border-radius: 26px;
+        padding: 18px;
+        box-shadow: 0 24px 60px rgba(33, 7, 25, 0.3);
+        backdrop-filter: blur(8px);
+      }
+      .board {
+        display: grid;
+        place-items: center;
+        gap: 18px;
+        min-height: 420px;
+        border-radius: 22px;
+        background:
+          radial-gradient(circle at center, rgba(255,255,255,0.14), transparent 24%),
+          linear-gradient(135deg, #4b1438, #6b0f1a 50%, #f17105);
+      }
+      .copy {
+        max-width: 30ch;
+        text-align: center;
+        color: rgba(255,247,236,0.92);
+        font-size: 1.08rem;
+      }
+      .doors {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      .door {
+        min-width: 98px;
+        padding: 18px 20px;
+        border-radius: 18px;
+        border: 2px solid rgba(255,255,255,0.28);
+        background: rgba(255,255,255,0.16);
+        color: white;
+        font-size: 1.25rem;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: inset 0 -10px 18px rgba(0,0,0,0.1);
+      }
+      .door.safe {
+        background: #f2c14e;
+        color: #21160a;
+        border-color: #f2c14e;
+      }
+      .door.trap {
+        background: #111111;
+        color: white;
+        border-color: #111111;
+      }
+      .door.disabled {
+        opacity: 0.55;
+        pointer-events: none;
+      }
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+        margin-top: 16px;
+      }
+      .stat {
+        padding: 14px;
+        border-radius: 18px;
+        background: rgba(255,255,255,0.08);
+      }
+      .stat span {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 0.82rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: rgba(255,255,255,0.56);
+      }
+      .stat strong {
+        font-size: 1.35rem;
+      }
+      @media (max-width: 640px) {
+        .board { min-height: 340px; }
+        .stats { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <a class="back" href="index.html">&larr; Back to home</a>
+      <header class="hero">
+        <h1>Fortune Ladder</h1>
+        <p>One safe pick climbs higher. One trap door sends the whole run crashing down.</p>
+      </header>
+
+      <section class="panel">
+        <div class="board">
+          <p class="copy" id="fortune-copy">Choose a door. One hides a trap.</p>
+          <div class="doors">
+            <button class="door" data-door="0" type="button">A</button>
+            <button class="door" data-door="1" type="button">B</button>
+            <button class="door" data-door="2" type="button">C</button>
+          </div>
+        </div>
+
+        <div class="stats">
+          <div class="stat">
+            <span>Current</span>
+            <strong id="fortune-current">0</strong>
+          </div>
+          <div class="stat">
+            <span>Best</span>
+            <strong id="fortune-best">0</strong>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>

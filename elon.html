@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Spend Elon Musk's Net Worth</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Space+Grotesk:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="hero">
+      <h1>Spend Elon Musk's Net Worth</h1>
+      <p class="hero-copy">
+        If Elon Musk liquidated everything, this simulator starts you with
+        <strong>$809,000,000,000</strong> based on a Forbes snapshot from
+        April 3, 2026.
+      </p>
+      <p class="hero-copy">Buy random things from cheap to absurd and see the receipt build itself.</p>
+    </header>
+
+    <section class="money-bar">
+      <p class="money-left" id="remaining-total">Remaining: $809,000,000,000</p>
+      <p class="money-spent" id="percentage-spent">You spent 0% of the total.</p>
+    </section>
+
+    <main class="app-shell">
+      <section class="items-grid" id="items-list"></section>
+
+      <section class="receipt-section">
+        <div class="receipt-head">
+          <div>
+            <p class="eyebrow">Receipt</p>
+            <h2>Your bill</h2>
+          </div>
+          <button id="print-bill" class="print-button" type="button">Print bill</button>
+        </div>
+
+        <div class="receipt-stats">
+          <p>Total spent: <strong id="spent-total">$0</strong></p>
+          <p>Total quantity: <strong id="bill-count">0</strong></p>
+        </div>
+
+        <div class="receipt-table-wrap">
+          <table class="receipt-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody id="bill-body">
+              <tr>
+                <td colspan="4" class="empty-row">Nothing selected yet.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="receipt-total">
+          <span>Grand total</span>
+          <strong id="bill-grand-total">$0</strong>
+        </div>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
